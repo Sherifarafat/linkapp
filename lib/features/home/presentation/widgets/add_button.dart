@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_shadows.dart';
 
 class AddButton extends StatelessWidget {
-  const AddButton({super.key, required this.onPressed});
+  const AddButton({super.key, required this.onPressed, this.isOpen = false});
 
   final VoidCallback onPressed;
+  final bool isOpen;
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Semantics(
       button: true,
       label: 'Add',
       child: Material(
-        color: AppColors.primary,
+        color: colors.primary,
         shape: const CircleBorder(),
         child: InkWell(
           onTap: onPressed,
@@ -22,20 +24,24 @@ class AddButton extends StatelessWidget {
             width: 58,
             height: 58,
             decoration: BoxDecoration(
-              color: AppColors.primary,
+              color: colors.primary,
               shape: BoxShape.circle,
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0A000000),
-                  blurRadius: 12,
-                  offset: Offset(0, 3),
-                ),
-              ],
+              boxShadow: AppShadows.of(context).soft,
             ),
-            child: const Icon(
-              Icons.add_rounded,
-              color: AppColors.onPrimary,
-              size: 28,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 260),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (child, animation) => RotationTransition(
+                turns: animation,
+                child: FadeTransition(opacity: animation, child: child),
+              ),
+              child: Icon(
+                isOpen ? Icons.close_rounded : Icons.add_rounded,
+                key: ValueKey(isOpen),
+                color: colors.onPrimary,
+                size: 27,
+              ),
             ),
           ),
         ),

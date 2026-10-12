@@ -12,6 +12,8 @@ class ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final appColors = AppColors.of(context);
     return Semantics(
       button: true,
       label: 'Profile',
@@ -26,10 +28,13 @@ class ProfileAvatar extends StatelessWidget {
             fit: BoxFit.cover,
             loadingBuilder: (context, child, progress) {
               if (progress == null) return child;
-              return const _AvatarFallback();
+              return _AvatarFallback(
+                  background: colors.outlineVariant,
+                  foreground: appColors.secondaryText);
             },
-            errorBuilder: (context, error, stackTrace) =>
-                const _AvatarFallback(),
+            errorBuilder: (context, error, stackTrace) => _AvatarFallback(
+                background: colors.outlineVariant,
+                foreground: appColors.secondaryText),
           ),
         ),
       ),
@@ -38,16 +43,19 @@ class ProfileAvatar extends StatelessWidget {
 }
 
 class _AvatarFallback extends StatelessWidget {
-  const _AvatarFallback();
+  const _AvatarFallback({required this.background, required this.foreground});
+
+  final Color background;
+  final Color foreground;
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       width: 46,
       height: 46,
       child: ColoredBox(
-        color: AppColors.outline,
-        child: Icon(Icons.person_rounded, color: AppColors.secondaryText),
+        color: background,
+        child: Icon(Icons.person_rounded, color: foreground),
       ),
     );
   }

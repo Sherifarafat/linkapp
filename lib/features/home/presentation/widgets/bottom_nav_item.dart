@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class BottomNavItem extends StatelessWidget {
   const BottomNavItem({
@@ -21,44 +22,21 @@ class BottomNavItem extends StatelessWidget {
       selected: selected,
       label: label,
       child: Material(
-        color: selected ? const Color(0xFFECECEC) : Colors.transparent,
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(32),
         child: InkWell(
-          onTap: onPressed,
+          hoverColor: Colors.transparent,
+          focusColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            onPressed();
+          },
           borderRadius: BorderRadius.circular(32),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: selected ? 8 : 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  iconAsset,
-                  width: 22,
-                  height: 22,
-                  fit: BoxFit.contain,
-                  color: selected
-                      ? const Color(0xFF111111)
-                      : const Color(0xFF929292),
-                  colorBlendMode: BlendMode.srcIn,
-                ),
-                if (selected) ...[
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFF111111),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
+          child: SizedBox(
+            height: 52,
           ),
         ),
       ),

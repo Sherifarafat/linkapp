@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
-
 class MenuButton extends StatelessWidget {
   const MenuButton({super.key, required this.onPressed});
 
@@ -9,21 +7,23 @@ class MenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return Semantics(
       button: true,
-      label: 'Menu',
+      label: isArabic ? 'القائمة' : 'Menu',
       child: Material(
-        color: AppColors.surface,
+        color: colors.surface,
         shape: const CircleBorder(),
         child: InkWell(
           onTap: onPressed,
           customBorder: const CircleBorder(),
-          child: const SizedBox(
+          child: SizedBox(
             width: 46,
             height: 46,
             child: Icon(
               Icons.menu_rounded,
-              color: AppColors.onSurface,
+              color: colors.onSurface,
               size: 24,
             ),
           ),
