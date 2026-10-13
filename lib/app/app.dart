@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import '../features/auth/presentation/pages/login_page.dart';
 import '../features/home/presentation/pages/home_page.dart';
 import 'theme/app_theme.dart';
 
@@ -12,6 +13,7 @@ class LinkApp extends StatefulWidget {
 }
 
 class _LinkAppState extends State<LinkApp> {
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   ThemeMode _themeMode = ThemeMode.light;
   Locale _locale = const Locale('en');
 
@@ -20,6 +22,7 @@ class _LinkAppState extends State<LinkApp> {
     return MaterialApp(
       title: 'Link',
       debugShowCheckedModeBanner: false,
+      navigatorKey: _navigatorKey,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: _themeMode,
@@ -32,18 +35,25 @@ class _LinkAppState extends State<LinkApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: HomePage(
-        isDarkMode: _themeMode == ThemeMode.dark,
-        isArabic: _locale.languageCode == 'ar',
-        onLanguageToggle: () => setState(() {
-          _locale = _locale.languageCode == 'ar'
-              ? const Locale('en')
-              : const Locale('ar');
-        }),
-        onThemeToggle: () => setState(() {
-          _themeMode =
-              _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
-        }),
+      home: LoginPage(
+        onAuthenticated: () => _navigatorKey.currentState?.pushReplacement(
+          MaterialPageRoute<void>(
+            builder: (_) => HomePage(
+              isDarkMode: _themeMode == ThemeMode.dark,
+              isArabic: _locale.languageCode == 'ar',
+              onLanguageToggle: () => setState(() {
+                _locale = _locale.languageCode == 'ar'
+                    ? const Locale('en')
+                    : const Locale('ar');
+              }),
+              onThemeToggle: () => setState(() {
+                _themeMode = _themeMode == ThemeMode.dark
+                    ? ThemeMode.light
+                    : ThemeMode.dark;
+              }),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -109,6 +109,7 @@ class _HomePageState extends State<HomePage> {
         : _createdLinks.map((draft) => _CreatedLinkTile(draft: draft)).toList();
 
     return Scaffold(
+      extendBody: true,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [

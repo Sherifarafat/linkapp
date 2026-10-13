@@ -1,4 +1,4 @@
-package com.example.link
+package com.sherifarafat.linkapp
 
 import io.flutter.embedding.android.FlutterActivity
 

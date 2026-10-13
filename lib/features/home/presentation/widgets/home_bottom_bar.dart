@@ -66,7 +66,9 @@ class _HomeBottomBarState extends State<HomeBottomBar> {
                     color: colors.surface,
                     borderRadius:
                         BorderRadius.circular(_isAddMenuOpen ? 26 : 40),
-                    boxShadow: AppShadows.of(context).soft,
+                    boxShadow: _isAddMenuOpen
+                        ? const <BoxShadow>[]
+                        : AppShadows.of(context).soft,
                   ),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
