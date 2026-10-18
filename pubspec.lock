@@ -272,6 +272,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_tts:
+    dependency: "direct main"
+    description:
+      name: flutter_tts
+      sha256: ce5eb209b40e95f2f4a1397116c87ab2fcdff32257d04ed7a764e75894c03775
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.5"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -389,6 +397,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  internet_connection_checker_plus:
+    dependency: "direct main"
+    description:
+      name: internet_connection_checker_plus
+      sha256: "43edc904d8b8a9f5a2f871e9317a352ca005641b2f158a8b22732447c9f3994e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.2"
   intl:
     dependency: transitive
     description:

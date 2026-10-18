@@ -3,6 +3,25 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_shadows.dart';
 
+enum AppAccentColor {
+  blue('Blue', 'أزرق', Color(0xFF263BFA), Color(0xFF8B9BFF)),
+  cyan('Cyan', 'سماوي', Color(0xFF00AEEF), Color(0xFF55D5FF)),
+  green('Green', 'أخضر', Color(0xFF00B894), Color(0xFF55D6B5)),
+  lime('Lime', 'ليموني', Color(0xFFA8CC00), Color(0xFFC7E85A)),
+  yellow('Yellow', 'أصفر', Color(0xFFF2BD00), Color(0xFFFFD75E)),
+  orange('Orange', 'برتقالي', Color(0xFFF46F50), Color(0xFFFF9B7F)),
+  pink('Pink', 'وردي', Color(0xFFE83E9B), Color(0xFFFF79C2)),
+  magenta('Magenta', 'أرجواني', Color(0xFFC13CCB), Color(0xFFE07AE8)),
+  black('Black', 'أسود', Color(0xFF171719), Color(0xFFB8B8C0));
+
+  const AppAccentColor(this.label, this.arabicLabel, this.light, this.dark);
+
+  final String label;
+  final String arabicLabel;
+  final Color light;
+  final Color dark;
+}
+
 abstract final class AppTheme {
   static const _lightScheme = ColorScheme.light(
     primary: Color(0xFF263BFA),
@@ -32,10 +51,21 @@ abstract final class AppTheme {
     shadow: Color(0xFF000000),
   );
 
-  static ThemeData get light =>
-      _build(_lightScheme, AppColors.light, AppShadows.light, Brightness.light);
-  static ThemeData get dark =>
-      _build(_darkScheme, AppColors.dark, AppShadows.dark, Brightness.dark);
+  static ThemeData light([AppAccentColor accent = AppAccentColor.blue]) =>
+      _build(_withAccent(_lightScheme, accent.light), AppColors.light,
+          AppShadows.light, Brightness.light);
+  static ThemeData dark([AppAccentColor accent = AppAccentColor.blue]) =>
+      _build(_withAccent(_darkScheme, accent.dark), AppColors.dark,
+          AppShadows.dark, Brightness.dark);
+
+  static ColorScheme _withAccent(ColorScheme scheme, Color primary) =>
+      scheme.copyWith(
+        primary: primary,
+        onPrimary: primary.computeLuminance() > .45 ? Colors.black : Colors.white,
+        primaryContainer: primary.withValues(alpha: .14),
+        onPrimaryContainer: primary,
+        inversePrimary: primary,
+      );
 
   static ThemeData _build(ColorScheme colors, AppColors appColors,
       AppShadows appShadows, Brightness brightness) {

@@ -5,18 +5,23 @@ import '../widgets/home_actions_sheet.dart';
 import '../widgets/home_header.dart';
 import '../widgets/create_link_sheet.dart';
 import 'profile_page.dart';
+import '../../../../app/theme/app_theme.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
     super.key,
     required this.isDarkMode,
     required this.isArabic,
+    required this.accentColor,
+    required this.onAccentColorChanged,
     required this.onThemeToggle,
     required this.onLanguageToggle,
   });
 
   final bool isDarkMode;
   final bool isArabic;
+  final AppAccentColor accentColor;
+  final ValueChanged<AppAccentColor> onAccentColorChanged;
   final VoidCallback onThemeToggle;
   final VoidCallback onLanguageToggle;
 
@@ -165,6 +170,11 @@ class _HomePageState extends State<HomePage> {
       builder: (_) => HomeActionsSheet(
         isDarkMode: widget.isDarkMode,
         isArabic: widget.isArabic,
+        accentColor: widget.accentColor,
+        onAccentColorChanged: (color) {
+          widget.onAccentColorChanged(color);
+          setState(() {});
+        },
         onThemeToggle: widget.onThemeToggle,
         onLanguageToggle: widget.onLanguageToggle,
         onLogout: () {
