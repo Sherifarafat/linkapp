@@ -8,7 +8,11 @@ import 'profile_page.dart';
 import '../../../rating/presentation/pages/rating_page.dart';
 import '../../../pay_coffee/presentation/widgets/pay_coffee_sheet.dart';
 import '../../../inbox/presentation/widgets/inbox_conversation_list.dart';
-import '../../../analytics/presentation/widgets/analytics_dashboard.dart';
+import '../../../analytics/presentation/widgets/analytics_date_selector.dart';
+import '../../../analytics/presentation/widgets/analytics_sales_card.dart';
+import '../../../analytics/presentation/widgets/analytics_device_breakdown.dart';
+import '../../../analytics/presentation/widgets/analytics_top_countries.dart';
+import '../../../analytics/presentation/widgets/analytics_traffic_time.dart';
 import '../../../../app/theme/app_theme.dart';
 
 class HomePage extends StatefulWidget {
@@ -134,7 +138,13 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             if (_selectedTab == 'Analytics')
-              AnalyticsDashboard(isArabic: widget.isArabic)
+              ...[
+                AnalyticsDateSelector(isArabic: widget.isArabic),
+                AnalyticsSalesCard(isArabic: widget.isArabic),
+                AnalyticsDeviceBreakdown(isArabic: widget.isArabic),
+                AnalyticsTopCountries(isArabic: widget.isArabic),
+                AnalyticsTrafficTime(isArabic: widget.isArabic),
+              ]
             else if (_selectedTab == 'Inbox')
               InboxConversationList(isArabic: widget.isArabic)
             else

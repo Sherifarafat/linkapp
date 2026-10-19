@@ -1,42 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:link/features/analytics/presentation/widgets/analytics_dashboard.dart';
+import 'package:link/features/analytics/presentation/widgets/analytics_date_selector.dart';
+import 'package:link/features/analytics/presentation/widgets/analytics_sales_card.dart';
 
-Widget _dashboard({required bool isArabic, ThemeData? theme}) => MaterialApp(
+Widget _dateSelector({required bool isArabic, ThemeData? theme}) => MaterialApp(
       theme: theme,
       home: Scaffold(
         body: CustomScrollView(
-          slivers: [AnalyticsDashboard(isArabic: isArabic)],
+          slivers: [
+            AnalyticsDateSelector(isArabic: isArabic),
+            AnalyticsSalesCard(isArabic: isArabic),
+          ],
         ),
       ),
     );
 
+String _monthLabel(WidgetTester tester) =>
+    tester.widget<Text>(find.byKey(const ValueKey('analytics-month'))).data!;
+
+String _selectedDay(WidgetTester tester) =>
+    tester.widget<Text>(find.byKey(const ValueKey('selected-day'))).data!;
+
 void main() {
-  testWidgets('shows empty analytics without invented totals', (tester) async {
-    await tester.pumpWidget(_dashboard(isArabic: false));
-
-    expect(find.text('Analytics'), findsOneWidget);
-    expect(find.text('Public profile tracking is not connected yet'),
-        findsOneWidget);
-    expect(find.text('—'), findsNWidgets(4));
-    expect(find.text('Visits from your public profile will appear here'),
-        findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Anonymous activity only'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Anonymous activity only'), findsOneWidget);
-  });
-
-  testWidgets('localizes the dashboard and period controls to Arabic', (
+  testWidgets('starts with a month bar and a five-day date strip', (
     tester,
   ) async {
-    await tester.pumpWidget(_dashboard(isArabic: true));
+    await tester.pumpWidget(_dateSelector(isArabic: false));
 
-    expect(find.text('الإحصائيات'), findsOneWidget);
-    expect(find.text('تتبع الملف العام غير متصل بعد'), findsOneWidget);
-    expect(find.text('٢٤ ساعة'), findsOneWidget);
-    expect(find.text('زوار مميزون'), findsOneWidget);
+    expect(find.byKey(const ValueKey('analytics-month')), findsOneWidget);
+    expect(find.byKey(const ValueKey('previous-month')), findsOneWidget);
+    expect(find.byKey(const ValueKey('next-month')), findsOneWidget);
+    expect(find.byKey(const ValueKey('previous-day')), findsOneWidget);
+    expect(find.byKey(const ValueKey('next-day')), findsOneWidget);
+    expect(find.byKey(const ValueKey('selected-day')), findsOneWidget);
+    expect(find.byType(AnalyticsDateSelector), findsOneWidget);
+    expect(
+      find.textContaining(RegExp(r'Mon|Tue|Wed|Thu|Fri|Sat|Sun')),
+      findsNWidgets(5),
+    );
+    expect(find.text('18,420'), findsOneWidget);
+    expect(find.text('Total views'), findsOneWidget);
+    expect(find.text('Total clicks'), findsOneWidget);
+  });
+
+  testWidgets('month and day arrows update the selected date', (tester) async {
+    await tester.pumpWidget(_dateSelector(isArabic: false));
+    final initialMonth = _monthLabel(tester);
+    final initialDay = _selectedDay(tester);
+
+    await tester.tap(find.byKey(const ValueKey('next-month')));
+    await tester.pumpAndSettle();
+    expect(_monthLabel(tester), isNot(initialMonth));
+    final dayAfterMonthChange = _selectedDay(tester);
+
+    await tester.tap(find.byKey(const ValueKey('next-day')));
+    await tester.pumpAndSettle();
+    expect(_selectedDay(tester), isNot(dayAfterMonthChange));
+  });
+
+  testWidgets('localizes month and weekday names to Arabic', (tester) async {
+    await tester.pumpWidget(_dateSelector(isArabic: true));
+
+    expect(_monthLabel(tester), contains(DateTime.now().year.toString()));
+    expect(
+      find.textContaining(
+        RegExp(r'الإثنين|الثلاثاء|الأربعاء|الخميس|الجمعة|السبت|الأحد'),
+      ),
+      findsAtLeastNWidgets(1),
+    );
+    expect(find.text('إجمالي المشاهدات'), findsOneWidget);
+    expect(find.text('إجمالي النقرات'), findsOneWidget);
   });
 }
