@@ -5,6 +5,10 @@ import '../widgets/home_actions_sheet.dart';
 import '../widgets/home_header.dart';
 import '../widgets/create_link_sheet.dart';
 import 'profile_page.dart';
+import '../../../rating/presentation/pages/rating_page.dart';
+import '../../../pay_coffee/presentation/widgets/pay_coffee_sheet.dart';
+import '../../../inbox/presentation/widgets/inbox_conversation_list.dart';
+import '../../../analytics/presentation/widgets/analytics_dashboard.dart';
 import '../../../../app/theme/app_theme.dart';
 
 class HomePage extends StatefulWidget {
@@ -129,17 +133,23 @@ class _HomePageState extends State<HomePage> {
                 headerColor: Theme.of(context).scaffoldBackgroundColor,
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => index.isEven
-                      ? homeItems[index ~/ 2]
-                      : const SizedBox(height: 10),
-                  childCount: homeItems.isEmpty ? 0 : homeItems.length * 2 - 1,
+            if (_selectedTab == 'Analytics')
+              AnalyticsDashboard(isArabic: widget.isArabic)
+            else if (_selectedTab == 'Inbox')
+              InboxConversationList(isArabic: widget.isArabic)
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => index.isEven
+                        ? homeItems[index ~/ 2]
+                        : const SizedBox(height: 10),
+                    childCount:
+                        homeItems.isEmpty ? 0 : homeItems.length * 2 - 1,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
@@ -156,7 +166,7 @@ class _HomePageState extends State<HomePage> {
     return switch (_selectedTab) {
       'Feed' => 'الرئيسية',
       'Inbox' => 'الوارد',
-      'Statics' => 'الإحصائيات',
+      'Analytics' => 'الإحصائيات',
       'Catalog' => 'الكتالوج',
       _ => _selectedTab,
     };
@@ -204,6 +214,40 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _openCreateSheet(int action) {
+    if (action == 6) {
+      final messenger = ScaffoldMessenger.of(context);
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => PayCoffeeSheet(
+          isArabic: widget.isArabic,
+          onConfirm: (_) {
+            Navigator.of(context).pop();
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text(
+                  widget.isArabic
+                      ? 'إعداد الدفع هيكون متاح قريبًا.'
+                      : 'Payment setup is coming soon.',
+                ),
+              ),
+            );
+          },
+        ),
+      );
+      return;
+    }
+
+    if (action == 4) {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => RatingPage(isArabic: widget.isArabic),
+        ),
+      );
+      return;
+    }
+
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

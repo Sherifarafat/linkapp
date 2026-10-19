@@ -584,6 +584,7 @@ class _TourSheetState extends State<_TourSheet> {
   int _speechTargetChars = 0;
   int _runId = 0;
   bool _voiceEnabled = true;
+  bool _isOpening = true;
   bool _hasSpeechProgress = false;
   bool _isSpeaking = false;
 
@@ -607,14 +608,6 @@ class _TourSheetState extends State<_TourSheet> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) unawaited(_playStep(0));
-    });
-  }
-
-  @override
   void dispose() {
     _controller.dispose();
     _typingTimer?.cancel();
@@ -631,6 +624,12 @@ class _TourSheetState extends State<_TourSheet> {
     _advanceTimer?.cancel();
     setState(() => _page = index);
     unawaited(_playStep(index));
+  }
+
+  void _finishOpening() {
+    if (!mounted || !_isOpening) return;
+    setState(() => _isOpening = false);
+    unawaited(_playStep(0));
   }
 
   Future<void> _safeStop() async {
@@ -849,9 +848,18 @@ class _TourSheetState extends State<_TourSheet> {
                 ),
               ),
             ),
-            SafeArea(
-              top: false,
-              child: Padding(
+            if (_isOpening)
+              Positioned.fill(
+                child: _TourOpening(
+                  isArabic: widget.isArabic,
+                  accent: colors.primary,
+                  onComplete: _finishOpening,
+                ),
+              )
+            else
+              SafeArea(
+                top: false,
+                child: Padding(
                 padding: const EdgeInsets.fromLTRB(22, 12, 22, 20),
                 child: Column(
                   children: [
@@ -992,13 +1000,239 @@ class _TourSheetState extends State<_TourSheet> {
                     ),
                   ],
                 ),
+                ),
               ),
-            ),
           ],
         ),
       ),
     );
   }
+}
+
+class _TourOpening extends StatefulWidget {
+  const _TourOpening({
+    required this.isArabic,
+    required this.accent,
+    required this.onComplete,
+  });
+
+  final bool isArabic;
+  final Color accent;
+  final VoidCallback onComplete;
+
+  @override
+  State<_TourOpening> createState() => _TourOpeningState();
+}
+
+class _TourOpeningState extends State<_TourOpening>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 3),
+  )..addStatusListener((status) {
+      if (status == AnimationStatus.completed) widget.onComplete();
+    });
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final foreground = Theme.of(context).colorScheme.onSurface;
+    final fadeIn = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(.16, .42, curve: Curves.easeOut),
+    );
+    final fadeOut = Tween<double>(begin: 1, end: 0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(.88, 1, curve: Curves.easeIn),
+      ),
+    );
+
+    return SafeArea(
+      top: false,
+      child: Stack(
+        children: [
+          Positioned(
+            top: 8,
+            left: 12,
+            child: IconButton(
+              tooltip: widget.isArabic ? 'إغلاق الجولة' : 'Close tour',
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.close_rounded),
+              color: foreground.withValues(alpha: .78),
+            ),
+          ),
+          Center(
+            child: FadeTransition(
+              opacity: fadeOut,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox.square(
+                    dimension: 230,
+                    child: AnimatedBuilder(
+                      animation: _controller,
+                      builder: (context, child) {
+                        final progress = _controller.value;
+                        final scale =
+                            .78 +
+                            .22 *
+                                Curves.easeOutBack.transform(
+                                  (progress / .55).clamp(0, 1).toDouble(),
+                                );
+                        return Transform.scale(
+                          scale: scale,
+                          child: CustomPaint(
+                            painter: _TourOpeningPainter(
+                              progress: progress,
+                              accent: widget.accent,
+                            ),
+                            child: Center(child: child),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 82,
+                        height: 82,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              widget.accent,
+                              Color.lerp(widget.accent, Colors.black, .22)!,
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: widget.accent.withValues(alpha: .45),
+                              blurRadius: 40,
+                              spreadRadius: 4,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.link_rounded,
+                          size: 42,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  FadeTransition(
+                    opacity: fadeIn,
+                    child: Column(
+                      children: [
+                        Text(
+                          'Link',
+                          style: TextStyle(
+                            color: foreground,
+                            fontSize: 30,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.isArabic
+                              ? 'كل عالمك في رابط واحد'
+                              : 'Your world in one link',
+                          style: TextStyle(
+                            color: foreground.withValues(
+                              alpha: isDark ? .72 : .76,
+                            ),
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TourOpeningPainter extends CustomPainter {
+  const _TourOpeningPainter({required this.progress, required this.accent});
+
+  final double progress;
+  final Color accent;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final fade = (1 - progress * .45).clamp(.25, 1.0).toDouble();
+    final orbitPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4
+      ..color = accent.withValues(alpha: .32 * fade);
+    final glowPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8)
+      ..color = accent.withValues(alpha: .24 * fade);
+
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.rotate(progress * math.pi * 1.7);
+    final firstOrbit = Rect.fromCenter(
+      center: Offset.zero,
+      width: 192,
+      height: 78,
+    );
+    canvas.drawOval(firstOrbit, glowPaint);
+    canvas.drawOval(firstOrbit, orbitPaint);
+
+    canvas.rotate(-progress * math.pi * 3.1);
+    final secondOrbit = Rect.fromCenter(
+      center: Offset.zero,
+      width: 166,
+      height: 118,
+    );
+    canvas.drawOval(
+      secondOrbit,
+      orbitPaint..color = accent.withValues(alpha: .2 * fade),
+    );
+
+    final angle = progress * math.pi * 2.8;
+    final satellite = Offset(math.cos(angle) * 96, math.sin(angle) * 39);
+    canvas.drawCircle(
+      satellite,
+      7,
+      Paint()
+        ..color = accent.withValues(alpha: .25 * fade)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
+    );
+    canvas.drawCircle(
+      satellite,
+      3.5,
+      Paint()..color = accent.withValues(alpha: fade),
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _TourOpeningPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.accent != accent;
 }
 
 class _TourStep {

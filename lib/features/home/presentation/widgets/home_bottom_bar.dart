@@ -29,7 +29,7 @@ class _HomeBottomBarState extends State<HomeBottomBar> {
   static const _tabs = [
     _TabItem(label: 'Feed', iconAsset: 'assets/icons/icon_01.png'),
     _TabItem(label: 'Inbox', iconAsset: 'assets/icons/icon_02.png'),
-    _TabItem(label: 'Statics', iconAsset: 'assets/icons/icon_03.png'),
+    _TabItem(label: 'Analytics', iconAsset: 'assets/icons/icon_03.png'),
     _TabItem(label: 'Catalog', iconAsset: 'assets/icons/icon_04.png'),
   ];
 
@@ -41,7 +41,7 @@ class _HomeBottomBarState extends State<HomeBottomBar> {
       return switch (tab.label) {
         'Feed' => 'الرئيسية',
         'Inbox' => 'الوارد',
-        'Statics' => 'الإحصائيات',
+        'Analytics' => 'الإحصائيات',
         'Catalog' => 'الكتالوج',
         _ => tab.label,
       };
@@ -60,7 +60,7 @@ class _HomeBottomBarState extends State<HomeBottomBar> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 420),
                   curve: Curves.easeInOutCubicEmphasized,
-                  height: _isAddMenuOpen ? 250 : 62,
+                    height: _isAddMenuOpen ? 330 : 62,
                   padding: EdgeInsets.all(_isAddMenuOpen ? 10 : 5),
                   decoration: BoxDecoration(
                     color: colors.surface,
@@ -257,7 +257,7 @@ class _AddActionsGrid extends StatelessWidget {
       crossAxisCount: 3,
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
-      childAspectRatio: 0.9,
+      childAspectRatio: 1.1,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: EdgeInsets.zero,
@@ -286,6 +286,10 @@ class _AddActionsGrid extends StatelessWidget {
             iconAsset: 'assets/icons/add_actions/add_banner.png',
             label: isArabic ? 'إضافة بانر' : 'Add banner',
             onTap: () => onAction(5)),
+        _AddAction(
+            icon: Icons.coffee_rounded,
+            label: isArabic ? 'ادفع قهوة' : 'Pay coffee',
+            onTap: () => onAction(6)),
       ],
     );
   }
@@ -293,8 +297,9 @@ class _AddActionsGrid extends StatelessWidget {
 
 class _AddAction extends StatelessWidget {
   const _AddAction(
-      {required this.iconAsset, required this.label, required this.onTap});
-  final String iconAsset;
+      {this.iconAsset, this.icon, required this.label, required this.onTap});
+  final String? iconAsset;
+  final IconData? icon;
   final String label;
   final VoidCallback onTap;
 
@@ -320,13 +325,19 @@ class _AddAction extends StatelessWidget {
                       borderRadius: BorderRadius.circular(15),
                     ),
                     alignment: Alignment.center,
-                    child: Image.asset(
-                      iconAsset,
-                      width: 25,
-                      height: 25,
-                      color: Theme.of(context).colorScheme.onSurface,
-                      colorBlendMode: BlendMode.srcIn,
-                    ),
+                    child: icon != null
+                        ? Icon(
+                            icon,
+                            size: 27,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          )
+                        : Image.asset(
+                            iconAsset!,
+                            width: 25,
+                            height: 25,
+                            color: Theme.of(context).colorScheme.onSurface,
+                            colorBlendMode: BlendMode.srcIn,
+                          ),
                   ),
                   const SizedBox(height: 6),
                   Text(label,
